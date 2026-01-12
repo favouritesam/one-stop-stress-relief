@@ -1,6 +1,6 @@
 "use client"
 
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -73,8 +73,8 @@ export default function MyPackages() {
                                                 <span className="font-medium">{item.package.rating.toFixed(1)}</span>
                                             </div>
                                             <span className="px-2 py-1 rounded bg-primary/10 text-primary text-xs font-medium">
-                        {item.package.category}
-                      </span>
+                                                {item.package.category}
+                                            </span>
                                         </div>
 
                                         {/* Progress Placeholder */}
@@ -98,13 +98,30 @@ export default function MyPackages() {
 
                                         {/* Action Buttons */}
                                         <div className="flex gap-2 pt-2">
-                                            <Button size="sm" className="flex-1 bg-gradient-to-r from-primary to-secondary text-white gap-2">
+                                            <Button
+                                                size="sm"
+                                                onClick={() => router.push(`/client/package/${item.package!.id}`)}
+                                                className="flex-1 bg-gradient-to-r from-primary to-secondary text-white gap-2"
+                                            >
                                                 <Play className="w-4 h-4" />
                                                 <span className="hidden sm:inline">Continue</span>
                                             </Button>
                                             <Button
                                                 size="sm"
                                                 variant="outline"
+                                                onClick={() => {
+                                                    if (item.package?.resourceUrl) {
+                                                        const link = document.createElement("a");
+                                                        link.href = item.package.resourceUrl;
+                                                        link.download = `${item.package.title.replace(/\s+/g, "_")}_Resources.pdf`;
+                                                        document.body.appendChild(link);
+                                                        link.click();
+                                                        document.body.removeChild(link);
+                                                    } else {
+                                                        const count = item.package!.content.worksheets?.length || 0;
+                                                        alert(`Preparing download for ${count} worksheets and resources from "${item.package!.title}"...`);
+                                                    }
+                                                }}
                                                 className="flex-1 border-primary/20 hover:bg-primary/5 gap-2 bg-transparent"
                                             >
                                                 <Download className="w-4 h-4" />

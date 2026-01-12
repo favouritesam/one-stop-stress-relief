@@ -1,32 +1,92 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X } from "lucide-react"
+import { ArrowLeft, Plus, X, Music, Play, Pause } from "lucide-react"
 import { STRESS_CATEGORIES } from "@/src/lib/types"
 
-export default function CreatePackageForm() {
+interface CreatePackageFormProps {
+    packageId?: string
+}
+
+export default function CreatePackageForm({ packageId }: CreatePackageFormProps) {
     const router = useRouter()
-    const { currentUser, addPackage } = useStore()
+    const { currentUser, addPackage, packages, updatePackage } = useStore()
+
+    const editingPackage = packageId ? packages.find((p) => p.id === packageId) : null
+
     const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        category: "",
-        price: 0,
-        audioGuides: [""],
-        worksheets: [""],
-        schedule: "",
-        preview: "",
+        title: editingPackage?.title || "",
+        description: editingPackage?.description || "",
+        category: editingPackage?.category || "",
+        price: editingPackage?.price || 0,
+        audioGuides: editingPackage?.content.audioGuides || [{ title: "", url: "" }],
+        worksheets: editingPackage?.content.worksheets || [""],
+        schedule: editingPackage?.content.schedule || "",
+        preview: editingPackage?.preview || "",
     })
+
+    const [audioUrls, setAudioUrls] = useState<(string | null)[]>(
+        editingPackage?.content.audioGuides?.map((a) => a.url || null) || [null]
+    )
+    const [playingIndex, setPlayingIndex] = useState<number | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+        // We removed the cleanup revocation because it was breaking blob URLs 
+        // when navigating between the form and the preview page.
+    }, [audioUrls]);
+
+    const handleAudioFileChange = (index: number, file: File | null) => {
+        const newAudioUrls = [...audioUrls];
+
+        // Revoke old URL if it exists
+        if (newAudioUrls[index] && newAudioUrls[index]?.startsWith('blob:')) {
+            URL.revokeObjectURL(newAudioUrls[index]!);
+        }
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            newAudioUrls[index] = url;
+
+            const newAudios = [...formData.audioGuides]
+            newAudios[index] = { ...newAudios[index], url: url }
+            setFormData({ ...formData, audioGuides: newAudios })
+        } else {
+            newAudioUrls[index] = null;
+            const newAudios = [...formData.audioGuides]
+            newAudios[index] = { ...newAudios[index], url: "" }
+            setFormData({ ...formData, audioGuides: newAudios })
+        }
+
+        setAudioUrls(newAudioUrls);
+    }
+
+    const togglePlay = (index: number) => {
+        const audio = document.getElementById(`audio-${index}`) as HTMLAudioElement
+        if (!audio) return
+
+        if (playingIndex === index) {
+            audio.pause()
+            setPlayingIndex(null)
+        } else {
+            // Stop other playing audio
+            if (playingIndex !== null) {
+                const prevAudio = document.getElementById(`audio-${playingIndex}`) as HTMLAudioElement
+                if (prevAudio) prevAudio.pause()
+            }
+            audio.play()
+            setPlayingIndex(index)
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -36,26 +96,35 @@ export default function CreatePackageForm() {
         setIsLoading(true)
 
         try {
-            const newPackage = {
-                id: `pkg-${Date.now()}`,
-                expertId: currentUser.id,
+            const packageData = {
                 title: formData.title,
                 description: formData.description,
                 category: formData.category,
                 price: formData.price,
-                rating: 0,
-                reviews: 0,
                 content: {
-                    audioGuides: formData.audioGuides.filter((a) => a.trim()),
+                    audioGuides: formData.audioGuides.filter((a) => a.title.trim()),
                     worksheets: formData.worksheets.filter((w) => w.trim()),
                     schedule: formData.schedule,
                     tracker: "Progress monitoring tools",
                 },
                 preview: formData.preview,
-                createdAt: new Date(),
             }
 
-            addPackage(newPackage)
+            if (editingPackage) {
+                updatePackage(editingPackage.id, packageData)
+            } else {
+                const newPackage = {
+                    ...packageData,
+                    id: `pkg-${Date.now()}`,
+                    expertId: currentUser.id,
+                    rating: 0,
+                    reviews: 0,
+                    createdAt: new Date(),
+                    views: 0,
+                    sales: 0,
+                }
+                addPackage(newPackage)
+            }
             router.push("/expert/dashboard")
         } catch (error) {
             console.error(error)
@@ -73,16 +142,19 @@ export default function CreatePackageForm() {
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold">Create New Package</h1>
+                        <h1 className="text-3xl font-bold">{editingPackage ? "Edit Package" : "Create New Package"}</h1>
                         <p className="text-muted-foreground mt-1">Design a stress-relief solution to help others</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Info Card */}
-                    <Card className="border-primary/20">
+                    <Card className="border-primary/20 shadow-sm transition-all hover:shadow-md">
                         <CardHeader>
-                            <CardTitle>Basic Information</CardTitle>
+                            <CardTitle className="flex items-center gap-2">
+                                <Plus className="w-5 h-5 text-primary" />
+                                Basic Information
+                            </CardTitle>
                             <CardDescription>Name and describe your package</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -151,48 +223,91 @@ export default function CreatePackageForm() {
                     </Card>
 
                     {/* Content Card */}
-                    <Card className="border-secondary/20">
+                    <Card className="border-secondary/20 shadow-sm transition-all hover:shadow-md">
                         <CardHeader>
-                            <CardTitle>Package Content</CardTitle>
+                            <CardTitle className="flex items-center gap-2">
+                                <Music className="w-5 h-5 text-secondary" />
+                                Package Content
+                            </CardTitle>
                             <CardDescription>Add audio guides and worksheets</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {/* Audio Guides */}
-                            <div className="space-y-3">
-                                <Label className="font-semibold">Audio Guides</Label>
+                            <div className="space-y-4">
+                                <Label className="font-semibold text-lg">Audio Guides</Label>
                                 {formData.audioGuides.map((audio, index) => (
-                                    <div key={index} className="flex gap-2">
-                                        <Input
-                                            placeholder="e.g., Guided Meditation for Work Stress"
-                                            value={audio}
-                                            onChange={(e) => {
-                                                const newAudios = [...formData.audioGuides]
-                                                newAudios[index] = e.target.value
-                                                setFormData({ ...formData, audioGuides: newAudios })
-                                            }}
-                                            className="border-secondary/20 focus:border-secondary"
-                                        />
-                                        {formData.audioGuides.length > 1 && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => {
-                                                    const newAudios = formData.audioGuides.filter((_, i) => i !== index)
+                                    <div key={index} className="space-y-2 p-4 border border-secondary/10 rounded-lg bg-secondary/5">
+                                        <div className="flex gap-2">
+                                            <Input
+                                                placeholder="Audio Title (e.g., Deep Breathing Exercise)"
+                                                value={audio.title}
+                                                onChange={(e) => {
+                                                    const newAudios = [...formData.audioGuides]
+                                                    newAudios[index] = { ...newAudios[index], title: e.target.value }
                                                     setFormData({ ...formData, audioGuides: newAudios })
                                                 }}
-                                                className="text-destructive hover:bg-destructive/10"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </Button>
-                                        )}
+                                                className="border-secondary/20 focus:border-secondary flex-1"
+                                            />
+                                            {formData.audioGuides.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        const newAudios = formData.audioGuides.filter((_: { title: string }, i: number) => i !== index)
+                                                        const newUrls = audioUrls.filter((_: string | null, i: number) => i !== index)
+                                                        setFormData({ ...formData, audioGuides: newAudios })
+                                                        setAudioUrls(newUrls)
+                                                    }}
+                                                    className="text-destructive hover:bg-destructive/10"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <Input
+                                                type="file"
+                                                accept="audio/*"
+                                                onChange={(e) => handleAudioFileChange(index, e.target.files?.[0] || null)}
+                                                className="border-secondary/20 focus:border-secondary flex-1 text-xs"
+                                            />
+                                            {audioUrls[index] && (
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => togglePlay(index)}
+                                                        className="h-8 w-8 rounded-full border-secondary/30 text-secondary"
+                                                    >
+                                                        {playingIndex === index ? (
+                                                            <Pause className="w-4 h-4" />
+                                                        ) : (
+                                                            <Play className="w-4 h-4 ml-0.5" />
+                                                        )}
+                                                    </Button>
+                                                    <audio
+                                                        id={`audio-${index}`}
+                                                        src={audioUrls[index] || ""}
+                                                        onEnded={() => setPlayingIndex(null)}
+                                                        className="hidden"
+                                                    />
+                                                    <span className="text-xs text-muted-foreground font-medium">Preview</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setFormData({ ...formData, audioGuides: [...formData.audioGuides, ""] })}
+                                    onClick={() => {
+                                        setFormData({ ...formData, audioGuides: [...formData.audioGuides, { title: "", url: "" }] })
+                                        setAudioUrls([...audioUrls, null])
+                                    }}
                                     className="border-secondary/20 hover:bg-secondary/5 text-secondary"
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
@@ -200,13 +315,15 @@ export default function CreatePackageForm() {
                                 </Button>
                             </div>
 
+                            <hr className="border-border/50" />
+
                             {/* Worksheets */}
                             <div className="space-y-3">
-                                <Label className="font-semibold">Worksheets</Label>
+                                <Label className="font-semibold text-lg">Worksheets</Label>
                                 {formData.worksheets.map((worksheet, index) => (
                                     <div key={index} className="flex gap-2">
                                         <Input
-                                            placeholder="e.g., Daily Stress Tracker"
+                                            placeholder="e.g., Daily Stress Tracker (PDF link or title)"
                                             value={worksheet}
                                             onChange={(e) => {
                                                 const newWorksheets = [...formData.worksheets]
@@ -246,7 +363,7 @@ export default function CreatePackageForm() {
                     </Card>
 
                     {/* Program Details Card */}
-                    <Card className="border-primary/20">
+                    <Card className="border-primary/20 shadow-sm transition-all hover:shadow-md">
                         <CardHeader>
                             <CardTitle>Program Details</CardTitle>
                             <CardDescription>Outline your program structure</CardDescription>
@@ -265,7 +382,7 @@ export default function CreatePackageForm() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="preview">Preview Content</Label>
+                                <Label htmlFor="preview">Preview Description</Label>
                                 <Input
                                     id="preview"
                                     placeholder="e.g., First 5 days of content included"
@@ -274,21 +391,24 @@ export default function CreatePackageForm() {
                                     required
                                     className="border-primary/20 focus:border-primary"
                                 />
+                                <p className="text-[10px] text-muted-foreground mt-1 px-1 italic">
+                                    Describe what users see before buying (e.g., introduction audio, first worksheet)
+                                </p>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-3 justify-end">
-                        <Button type="button" variant="outline" onClick={() => router.push("/expert/dashboard")} className="px-6">
+                    <div className="flex gap-3 justify-end pt-4">
+                        <Button type="button" variant="outline" onClick={() => router.push("/expert/dashboard")} className="px-8 h-12">
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={isLoading || !formData.title || !formData.category}
-                            className="px-6 bg-gradient-to-r from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90"
+                            className="px-10 h-12 bg-gradient-to-r from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 shadow-lg shadow-primary/20"
                         >
-                            {isLoading ? "Creating..." : "Create Package"}
+                            {isLoading ? (editingPackage ? "Saving..." : "Creating...") : (editingPackage ? "Save Changes" : "Create Package")}
                         </Button>
                     </div>
                 </form>

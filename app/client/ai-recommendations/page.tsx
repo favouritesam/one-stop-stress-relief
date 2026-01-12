@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { Star, TrendingUp, Zap, MessageCircle } from "lucide-react"
 import Navbar from "@/src/components/layout/navbar";
 
 export default function AIRecommendationsPage() {
     const router = useRouter()
-    const { currentUser, getMatchedPackages, packages, getUserAssessment } = useStore()
+    const { currentUser, getMatchedPackages, packages, getUserAssessment, isHydrated } = useStore()
     const [matchedPackages, setMatchedPackages] = useState<any[]>([])
     const [assessment, setAssessment] = useState<any>(null)
 
     useEffect(() => {
+        if (!isHydrated) return
+
         if (!currentUser) {
             router.push("/")
             return
@@ -35,10 +37,14 @@ export default function AIRecommendationsPage() {
             return { ...match, package: pkg }
         })
         setMatchedPackages(matchedWithDetails)
-    }, [currentUser, getMatchedPackages, getUserAssessment, packages, router])
+    }, [currentUser, getMatchedPackages, getUserAssessment, packages, router, isHydrated])
 
-    if (!assessment) {
-        return null
+    if (!isHydrated || !assessment) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-muted-foreground">Loading recommendations...</p>
+            </div>
+        )
     }
 
     const getSeverityColor = (severity: number) => {
@@ -94,11 +100,11 @@ export default function AIRecommendationsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex items-center gap-2">
-                    <span
-                        className={`px-2 py-1 rounded text-sm font-semibold ${getSeverityColor(assessment.severity)}`}
-                    >
-                      {getSeverityLabel(assessment.severity)}
-                    </span>
+                                        <span
+                                            className={`px-2 py-1 rounded text-sm font-semibold ${getSeverityColor(assessment.severity)}`}
+                                        >
+                                            {getSeverityLabel(assessment.severity)}
+                                        </span>
                                         <span className="text-2xl font-bold">{assessment.severity}/10</span>
                                     </div>
                                 </CardContent>
@@ -188,11 +194,10 @@ export default function AIRecommendationsPage() {
                                                         {[...Array(5)].map((_, i) => (
                                                             <Star
                                                                 key={i}
-                                                                className={`w-4 h-4 ${
-                                                                    i < Math.floor(pkg.rating)
+                                                                className={`w-4 h-4 ${i < Math.floor(pkg.rating)
                                                                         ? "fill-yellow-400 text-yellow-400"
                                                                         : "text-muted-foreground"
-                                                                }`}
+                                                                    }`}
                                                             />
                                                         ))}
                                                     </div>

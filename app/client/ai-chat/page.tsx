@@ -6,15 +6,19 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Send, Loader2, Lightbulb } from "lucide-react"
-import {useStore} from "@/src/lib/store";
+import { Send, Loader2, Lightbulb, Languages, Mic, MicOff } from "lucide-react"
+import { useStore } from "@/src/lib/store";
 import Navbar from "@/src/components/layout/navbar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function AIChatPage() {
     const { currentUser, addChatMessage, getUserChatMessages } = useStore()
     const [messages, setMessages] = useState<any[]>([])
     const [input, setInput] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [selectedLanguage, setSelectedLanguage] = useState("English")
+    const [isRecording, setIsRecording] = useState(false)
+    const recognitionRef = useRef<any>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -27,6 +31,73 @@ export default function AIChatPage() {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [messages])
+
+    const autoSendTriggerRef = useRef(false);
+    const sendButtonRef = useRef<HTMLButtonElement>(null);
+
+    // Voice Recording Logic (Web Speech API)
+    useEffect(() => {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognitionRef.current = new SpeechRecognition();
+            recognitionRef.current.continuous = false;
+            recognitionRef.current.interimResults = false;
+
+            recognitionRef.current.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setInput(transcript);
+                autoSendTriggerRef.current = true;
+            };
+
+            recognitionRef.current.onend = () => {
+                setIsRecording(false);
+                if (autoSendTriggerRef.current) {
+                    autoSendTriggerRef.current = false;
+                    // Automatically trigger send
+                    setTimeout(() => {
+                        sendButtonRef.current?.click();
+                    }, 100);
+                }
+            };
+
+            recognitionRef.current.onerror = (event: any) => {
+                console.error("Speech recognition error", event.error);
+                setIsRecording(false);
+            };
+        }
+    }, []);
+
+    // Update recognition language when selection changes
+    useEffect(() => {
+        if (recognitionRef.current) {
+            const langMap: Record<string, string> = {
+                "English": "en-US",
+                "Spanish": "es-ES",
+                "French": "fr-FR",
+                "German": "de-DE",
+                "Chinese": "zh-CN"
+            };
+            recognitionRef.current.lang = langMap[selectedLanguage] || "en-US";
+        }
+    }, [selectedLanguage]);
+
+    const toggleRecording = () => {
+        if (!isRecording) {
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.start();
+                    setIsRecording(true);
+                } catch (err) {
+                    console.error("Recognition already started", err);
+                }
+            } else {
+                alert("Voice recognition is not supported in this browser.");
+            }
+        } else {
+            recognitionRef.current?.stop();
+            setIsRecording(false);
+        }
+    };
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -47,7 +118,7 @@ export default function AIChatPage() {
         setIsLoading(true)
 
         try {
-            // Call AI chat API
+            // Call AI chat API with selected language
             const response = await fetch("/api/ai-chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -55,6 +126,7 @@ export default function AIChatPage() {
                     message: input,
                     userId: currentUser.id,
                     previousMessages: messages,
+                    language: selectedLanguage, // Send language choice to the AI
                 }),
             })
 
@@ -91,10 +163,28 @@ export default function AIChatPage() {
                 <div className="max-w-3xl mx-auto px-4">
                     {/* Chat Container */}
                     <Card className="border-border/50 flex flex-col h-[600px] overflow-hidden">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b border-border/50 px-6 py-4">
-                            <h1 className="text-2xl font-bold">Stress Relief AI Assistant</h1>
-                            <p className="text-sm text-muted-foreground mt-1">Get personalized guidance on managing your stress</p>
+                        {/* Header with Language Selector */}
+                        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b border-border/50 px-6 py-4 flex items-center justify-between">
+                            <div>
+                                <h1 className="text-2xl font-bold">Stress Relief AI Assistant</h1>
+                                <p className="text-sm text-muted-foreground mt-1">Get personalized guidance on managing your stress</p>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Languages className="w-4 h-4 text-primary" />
+                                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                                    <SelectTrigger className="w-[120px] bg-background border-primary/20 focus:ring-primary/20">
+                                        <SelectValue placeholder="Language" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="English">English</SelectItem>
+                                        <SelectItem value="Spanish">Español</SelectItem>
+                                        <SelectItem value="French">Français</SelectItem>
+                                        <SelectItem value="German">Deutsch</SelectItem>
+                                        <SelectItem value="Chinese">中文</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
 
                         {/* Messages Area */}
@@ -132,11 +222,10 @@ export default function AIChatPage() {
                                 messages.map((msg) => (
                                     <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                                         <div
-                                            className={`max-w-xs px-4 py-3 rounded-lg ${
-                                                msg.role === "user"
-                                                    ? "bg-gradient-to-r from-primary to-secondary text-white rounded-br-none"
-                                                    : "bg-muted text-foreground rounded-bl-none"
-                                            }`}
+                                            className={`max-w-xs px-4 py-3 rounded-lg ${msg.role === "user"
+                                                ? "bg-gradient-to-r from-primary to-secondary text-white rounded-br-none"
+                                                : "bg-muted text-foreground rounded-bl-none"
+                                                }`}
                                         >
                                             <p className="text-sm">{msg.content}</p>
                                             <p className={`text-xs mt-1 ${msg.role === "user" ? "text-white/70" : "text-muted-foreground"}`}>
@@ -175,7 +264,17 @@ export default function AIChatPage() {
                                     className="flex-1 rounded-full border-border/50"
                                 />
                                 <Button
+                                    type="button"
+                                    onClick={toggleRecording}
+                                    variant={isRecording ? "destructive" : "outline"}
+                                    size="icon"
+                                    className={`rounded-full shrink-0 ${isRecording ? "animate-pulse" : "border-primary/20 text-primary hover:bg-primary/5"}`}
+                                >
+                                    {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                                </Button>
+                                <Button
                                     type="submit"
+                                    ref={sendButtonRef}
                                     disabled={!input.trim() || isLoading}
                                     size="icon"
                                     className="rounded-full bg-gradient-to-r from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts"
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { TrendingUp, Eye, Star, Users } from "lucide-react"
 import Navbar from "@/src/components/layout/navbar";
 
-export default function RecommendationsPage() {
+export default function AIInsightsPage() {
     const router = useRouter()
     const { currentUser, packages, assessments } = useStore()
     const [recommendationData, setRecommendationData] = useState<any[]>([])

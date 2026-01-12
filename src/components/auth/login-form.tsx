@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -64,8 +64,8 @@ export default function LoginForm() {
                             <span className="text-white font-bold text-lg">SR</span>
                         </div>
                         <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              StressRelief
-            </span>
+                            StressRelief
+                        </span>
                     </div>
                     <CardTitle className="text-2xl">Welcome Back</CardTitle>
                     <CardDescription>Sign in to your account to continue</CardDescription>
@@ -156,11 +156,12 @@ export default function LoginForm() {
                                 onClick={() => {
                                     const clientUser = users.find((u) => u.userType === "client")
                                     if (clientUser) {
-                                        const newClient = {
+                                        // Use stable ID for demo client to ensure persistence works
+                                        const demoClient = {
                                             ...clientUser,
-                                            id: "client-" + Date.now(),
+                                            id: "client-1",
                                         }
-                                        setCurrentUser(newClient)
+                                        setCurrentUser(demoClient)
                                         setAuthenticated(true)
                                         router.push("/client/marketplace")
                                     }

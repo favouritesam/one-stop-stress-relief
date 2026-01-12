@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Mail, Lock, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {UserType} from "@/src/lib/types"
+import { UserType } from "@/src/lib/types"
 import type { User as UserStore } from "@/src/lib/store"
 
 
@@ -65,7 +65,7 @@ export default function SignupForm() {
             if (formData.userType === "expert") {
                 router.push("/expert/onboarding")
             } else {
-                router.push("/client/assessment")
+                router.push("/client/quiz")
             }
         } catch (err) {
             setError("An error occurred. Please try again.")
@@ -83,8 +83,8 @@ export default function SignupForm() {
                             <span className="text-white font-bold text-lg">SR</span>
                         </div>
                         <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              StressRelief
-            </span>
+                            StressRelief
+                        </span>
                     </div>
                     <CardTitle className="text-2xl">Create Account</CardTitle>
                     <CardDescription>Join our community of stress-relief experts and seekers</CardDescription>

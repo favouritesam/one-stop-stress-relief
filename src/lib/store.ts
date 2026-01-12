@@ -382,11 +382,13 @@ export interface Package {
     reviews: number
     image?: string
     content: {
-        audioGuides?: string[]
+        audioGuides?: { title: string; url?: string }[]
         worksheets?: string[]
         schedule?: string
         tracker?: string
     }
+    videoUrl?: string
+    resourceUrl?: string
     preview?: string
     createdAt: Date
     views: number
@@ -403,6 +405,7 @@ export interface User {
     rating?: number
     totalEarnings?: number
     createdAt: Date
+    wishlist?: string[]
 }
 
 export interface Purchase {
@@ -492,15 +495,25 @@ interface StoreState {
     clearUserChat: (userId: string) => void
 
     // Matched packages state
-    matchedPackages: Map<string, MatchedPackage[]>
+    matchedPackages: Record<string, MatchedPackage[]>
     setMatchedPackages: (userId: string, matches: MatchedPackage[]) => void
     getMatchedPackages: (userId: string) => MatchedPackage[]
+
+    // Wishlist state
+    toggleWishlist: (userId: string, packageId: string) => void
+    isPackageWishlisted: (userId: string, packageId: string) => boolean
+
+    // Purchase state
+    isPackagePurchased: (userId: string, packageId: string) => boolean
 
     // Hydration state
     isHydrated: boolean
 }
 
 const STORAGE_KEY = "stressrelief-user"
+const PACKAGES_KEY = "stressrelief-packages-v2"
+const ASSESSMENTS_KEY = "stressrelief-assessments"
+const MATCHES_KEY = "stressrelief-matches-v2"
 
 export const useStore = create<StoreState>((set, get) => ({
     // User state
@@ -525,6 +538,14 @@ export const useStore = create<StoreState>((set, get) => ({
             rating: 4.6,
             totalEarnings: 12000,
             createdAt: new Date("2024-02-20"),
+        },
+        {
+            id: "client-1",
+            email: "seeker@example.com",
+            name: "Default Seeker",
+            userType: "client",
+            createdAt: new Date("2024-03-01"),
+            wishlist: [],
         },
     ],
 
@@ -565,7 +586,11 @@ export const useStore = create<StoreState>((set, get) => ({
             rating: 4.8,
             reviews: 245,
             content: {
-                audioGuides: ["Guided Meditation", "Breathing Techniques", "Sleep Stories"],
+                audioGuides: [
+                    { title: "Guided Meditation" },
+                    { title: "Breathing Techniques" },
+                    { title: "Sleep Stories" },
+                ],
                 worksheets: ["Daily Reflection", "Priority Matrix", "Goal Setting"],
                 schedule: "30-day personalized plan",
                 tracker: "Progress monitoring tools",
@@ -574,6 +599,8 @@ export const useStore = create<StoreState>((set, get) => ({
             createdAt: new Date("2024-01-20"),
             views: 1245,
             sales: 89,
+            videoUrl: "https://www.youtube.com/watch?v=inpok4MKVLM", // Guided Breathing for Stress
+            resourceUrl: "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf", // Sample PDF resource
         },
         {
             id: "pkg-2",
@@ -585,7 +612,11 @@ export const useStore = create<StoreState>((set, get) => ({
             rating: 4.7,
             reviews: 189,
             content: {
-                audioGuides: ["Communication Skills", "Conflict Resolution", "Emotional Intelligence"],
+                audioGuides: [
+                    { title: "Communication Skills" },
+                    { title: "Conflict Resolution" },
+                    { title: "Emotional Intelligence" },
+                ],
                 worksheets: ["Conversation Starters", "Boundary Setting", "Love Languages"],
                 schedule: "21-day course",
                 tracker: "Relationship health tracker",
@@ -594,6 +625,8 @@ export const useStore = create<StoreState>((set, get) => ({
             createdAt: new Date("2024-01-25"),
             views: 892,
             sales: 64,
+            videoUrl: "https://www.youtube.com/watch?v=YpZIn5LIP9M", // Communication in relationships
+            resourceUrl: "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf",
         },
         {
             id: "pkg-3",
@@ -605,7 +638,11 @@ export const useStore = create<StoreState>((set, get) => ({
             rating: 4.9,
             reviews: 312,
             content: {
-                audioGuides: ["Money Mindset", "Budgeting Basics", "Investment Understanding"],
+                audioGuides: [
+                    { title: "Money Mindset" },
+                    { title: "Budgeting Basics" },
+                    { title: "Investment Understanding" },
+                ],
                 worksheets: ["Budget Planner", "Debt Strategy", "Income Goals"],
                 schedule: "45-day comprehensive program",
                 tracker: "Financial progress dashboard",
@@ -614,23 +651,37 @@ export const useStore = create<StoreState>((set, get) => ({
             createdAt: new Date("2024-02-01"),
             views: 1567,
             sales: 123,
+            videoUrl: "https://www.youtube.com/watch?v=hB6A-K6pC_0", // Financial stress relief
+            resourceUrl: "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf",
         },
     ],
 
     addPackage: (pkg) =>
-        set((state) => ({
-            packages: [...state.packages, pkg],
-        })),
+        set((state) => {
+            const newPackages = [...state.packages, pkg]
+            if (typeof window !== "undefined") {
+                localStorage.setItem(PACKAGES_KEY, JSON.stringify(newPackages))
+            }
+            return { packages: newPackages }
+        }),
 
     updatePackage: (packageId, updates) =>
-        set((state) => ({
-            packages: state.packages.map((pkg) => (pkg.id === packageId ? { ...pkg, ...updates } : pkg)),
-        })),
+        set((state) => {
+            const newPackages = state.packages.map((pkg) => (pkg.id === packageId ? { ...pkg, ...updates } : pkg))
+            if (typeof window !== "undefined") {
+                localStorage.setItem(PACKAGES_KEY, JSON.stringify(newPackages))
+            }
+            return { packages: newPackages }
+        }),
 
     deletePackage: (packageId) =>
-        set((state) => ({
-            packages: state.packages.filter((pkg) => pkg.id !== packageId),
-        })),
+        set((state) => {
+            const newPackages = state.packages.filter((pkg) => pkg.id !== packageId)
+            if (typeof window !== "undefined") {
+                localStorage.setItem(PACKAGES_KEY, JSON.stringify(newPackages))
+            }
+            return { packages: newPackages }
+        }),
 
     getPackagesByExpert: (expertId) => {
         return get().packages.filter((pkg) => pkg.expertId === expertId)
@@ -674,9 +725,13 @@ export const useStore = create<StoreState>((set, get) => ({
     // AI and assessment state
     assessments: [],
     addAssessment: (assessment) =>
-        set((state) => ({
-            assessments: [...state.assessments, assessment],
-        })),
+        set((state) => {
+            const newAssessments = [...state.assessments, assessment]
+            if (typeof window !== "undefined") {
+                localStorage.setItem(ASSESSMENTS_KEY, JSON.stringify(newAssessments))
+            }
+            return { assessments: newAssessments }
+        }),
     getUserAssessment: (userId) => {
         return get().assessments.find((a) => a.userId === userId)
     },
@@ -743,16 +798,58 @@ export const useStore = create<StoreState>((set, get) => ({
         })),
 
     // Matched packages state
-    matchedPackages: new Map(),
+    matchedPackages: {},
     setMatchedPackages: (userId, matches) => {
         set((state) => {
-            const newMap = new Map(state.matchedPackages)
-            newMap.set(userId, matches)
-            return { matchedPackages: newMap }
+            const newMatches = { ...state.matchedPackages, [userId]: matches }
+            if (typeof window !== "undefined") {
+                localStorage.setItem(MATCHES_KEY, JSON.stringify(newMatches))
+            }
+            return { matchedPackages: newMatches }
         })
     },
     getMatchedPackages: (userId) => {
-        return get().matchedPackages.get(userId) || []
+        return get().matchedPackages[userId] || []
+    },
+
+    // Wishlist state
+    toggleWishlist: (userId, packageId) =>
+        set((state) => {
+            const newUsers = state.users.map((user) => {
+                if (user.id === userId) {
+                    const currentWishlist = user.wishlist || []
+                    const newWishlist = currentWishlist.includes(packageId)
+                        ? currentWishlist.filter((id) => id !== packageId)
+                        : [...currentWishlist, packageId]
+
+                    const updatedUser = { ...user, wishlist: newWishlist }
+
+                    // Update current user if it matches
+                    if (state.currentUser?.id === userId) {
+                        if (typeof window !== "undefined") {
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser))
+                        }
+                    }
+
+                    return updatedUser
+                }
+                return user
+            })
+
+            // Also update currentUser in state if it matches
+            const currentUser = state.currentUser?.id === userId
+                ? newUsers.find(u => u.id === userId) || state.currentUser
+                : state.currentUser
+
+            return { users: newUsers, currentUser }
+        }),
+    isPackageWishlisted: (userId, packageId) => {
+        const user = get().users.find((u) => u.id === userId)
+        return user?.wishlist?.includes(packageId) || false
+    },
+
+    isPackagePurchased: (userId, packageId) => {
+        return get().purchases.some((p) => p.userId === userId && p.packageId === packageId)
     },
 
     // Hydration state
@@ -765,6 +862,56 @@ export const loadPersistedUser = () => {
         if (saved) {
             try {
                 return JSON.parse(saved) as User
+            } catch {
+                return null
+            }
+        }
+    }
+    return null
+}
+
+export const loadPersistedPackages = () => {
+    if (typeof window !== "undefined") {
+        const saved = localStorage.getItem(PACKAGES_KEY)
+        if (saved) {
+            try {
+                const pkgs = JSON.parse(saved)
+                // Convert string dates back to Date objects
+                return pkgs.map((p: any) => ({
+                    ...p,
+                    createdAt: new Date(p.createdAt)
+                })) as Package[]
+            } catch {
+                return null
+            }
+        }
+    }
+    return null
+}
+export const loadPersistedAssessments = () => {
+    if (typeof window !== "undefined") {
+        const saved = localStorage.getItem(ASSESSMENTS_KEY)
+        if (saved) {
+            try {
+                const asses = JSON.parse(saved)
+                return asses.map((a: any) => ({
+                    ...a,
+                    createdAt: new Date(a.createdAt)
+                })) as StressAssessment[]
+            } catch {
+                return null
+            }
+        }
+    }
+    return null
+}
+
+export const loadPersistedMatches = () => {
+    if (typeof window !== "undefined") {
+        const saved = localStorage.getItem(MATCHES_KEY)
+        if (saved) {
+            try {
+                return JSON.parse(saved) as Record<string, MatchedPackage[]>
             } catch {
                 return null
             }
