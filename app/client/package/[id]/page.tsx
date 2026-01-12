@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ShoppingCart, Star, Music, FileText, Calendar, Check, Heart, Play, Download } from "lucide-react"
-import Navbar from "@/src/components/layout/navbar";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 export default function PackageDetailPage() {
     const { packages, users, currentUser, toggleWishlist, isPackageWishlisted, isPackagePurchased } = useStore()
@@ -53,18 +53,17 @@ export default function PackageDetailPage() {
 
     if (!pkg || !expert) {
         return (
-            <>
-                <Navbar />
+            <DashboardLayout>
                 <div className="min-h-screen flex items-center justify-center">
                     <p>Package not found</p>
                 </div>
-            </>
+            </DashboardLayout>
         )
     }
 
+
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* Navigation */}
@@ -262,6 +261,6 @@ export default function PackageDetailPage() {
                     </div>
                 </div>
             </div>
-        </>
+        </DashboardLayout>
     )
 }

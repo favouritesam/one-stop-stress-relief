@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowRight, Brain } from "lucide-react"
-import Navbar from "@/src/components/layout/navbar";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 const STRESS_TYPES = [
     { id: "work", label: "Work Stress", icon: "💼" },
@@ -102,11 +102,10 @@ export default function StressAssessmentQuiz() {
                             <button
                                 key={type.id}
                                 onClick={() => setSelectedStressType(type.id)}
-                                className={`p-4 rounded-lg border-2 transition-all ${
-                                    selectedStressType === type.id
+                                className={`p-4 rounded-lg border-2 transition-all ${selectedStressType === type.id
                                         ? "border-primary bg-primary/10"
                                         : "border-border hover:border-primary/50"
-                                }`}
+                                    }`}
                             >
                                 <div className="text-2xl mb-2">{type.icon}</div>
                                 <div className="font-medium text-sm">{type.label}</div>
@@ -234,8 +233,7 @@ export default function StressAssessmentQuiz() {
     }
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-12">
                 <div className="max-w-2xl mx-auto px-4">
                     <Card className="border-border/50">
@@ -255,9 +253,9 @@ export default function StressAssessmentQuiz() {
                             {/* Progress bar */}
                             <div className="pt-4">
                                 <div className="flex justify-between text-sm text-muted-foreground mb-2">
-                  <span>
-                    Step {step + 1} of {steps.length}
-                  </span>
+                                    <span>
+                                        Step {step + 1} of {steps.length}
+                                    </span>
                                     <span>{Math.round(((step + 1) / steps.length) * 100)}%</span>
                                 </div>
                                 <div className="h-2 bg-border rounded-full overflow-hidden">
@@ -299,6 +297,6 @@ export default function StressAssessmentQuiz() {
                     </Card>
                 </div>
             </div>
-        </>
+        </DashboardLayout>
     )
 }

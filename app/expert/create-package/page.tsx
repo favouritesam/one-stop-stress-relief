@@ -1,10 +1,10 @@
 "use client"
 
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import Navbar from "@/src/components/layout/navbar";
 import CreatePackageForm from "@/src/components/expert/create-package-form";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 export default function CreatePackagePage() {
     const { currentUser } = useStore()
@@ -21,9 +21,8 @@ export default function CreatePackagePage() {
     }
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <CreatePackageForm />
-        </>
+        </DashboardLayout>
     )
 }

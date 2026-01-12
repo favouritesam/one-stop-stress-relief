@@ -1,6 +1,6 @@
 "use client"
 
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, DollarSign, Users, Calendar, Download, Filter } from "lucide-react"
@@ -9,6 +9,50 @@ import { useState } from "react"
 export default function EarningsPage() {
     const { currentUser, purchases, packages } = useStore()
     const [filterMonth, setFilterMonth] = useState("all")
+    const [isPayoutLoading, setIsPayoutLoading] = useState(false)
+
+    const handleDownloadReport = () => {
+        if (expertPurchases.length === 0) {
+            alert("No sales data available to download.");
+            return;
+        }
+
+        const headers = ["Date", "Package", "Amount", "Platform Fee", "Net Earnings"];
+        const rows = expertPurchases.map(p => {
+            const pkg = packages.find(pkg => pkg.id === p.packageId);
+            return [
+                new Date(p.purchasedAt).toLocaleDateString(),
+                pkg?.title || "Unknown Package",
+                p.amount.toFixed(2),
+                (p.amount * 0.2).toFixed(2),
+                (p.amount * 0.8).toFixed(2)
+            ].join(",");
+        });
+
+        const csvContent = [headers.join(","), ...rows].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `earnings_report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleRequestPayout = () => {
+        if (netEarnings <= 0) {
+            alert("No available earnings to payout.");
+            return;
+        }
+
+        setIsPayoutLoading(true);
+        // Simulate API call
+        setTimeout(() => {
+            setIsPayoutLoading(false);
+            alert(`Payout request for $${(netEarnings / 2).toFixed(2)} submitted successfully! It will be processed on the next pay date.`);
+        }, 1500);
+    };
 
     if (!currentUser) return null
 
@@ -56,7 +100,10 @@ export default function EarningsPage() {
                         <h1 className="text-3xl sm:text-4xl font-bold">Revenue & Earnings</h1>
                         <p className="text-muted-foreground mt-2">Track your sales and payouts</p>
                     </div>
-                    <Button className="mt-4 sm:mt-0 bg-gradient-to-r from-primary to-secondary text-white gap-2">
+                    <Button
+                        onClick={handleDownloadReport}
+                        className="mt-4 sm:mt-0 bg-gradient-to-r from-primary to-secondary text-white gap-2"
+                    >
                         <Download className="w-4 h-4" />
                         Download Report
                     </Button>
@@ -149,7 +196,13 @@ export default function EarningsPage() {
                                 </div>
                             </div>
 
-                            <Button className="w-full bg-gradient-to-r from-primary to-secondary text-white">Request Payout</Button>
+                            <Button
+                                onClick={handleRequestPayout}
+                                disabled={isPayoutLoading || netEarnings <= 0}
+                                className="w-full bg-gradient-to-r from-primary to-secondary text-white"
+                            >
+                                {isPayoutLoading ? "Processing..." : "Request Payout"}
+                            </Button>
 
                             <p className="text-xs text-muted-foreground text-center pt-2">
                                 Payouts are sent to your registered bank account

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useStore } from "@/src/lib/store";
 import { Star, TrendingUp, Zap, MessageCircle } from "lucide-react"
-import Navbar from "@/src/components/layout/navbar";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 export default function AIRecommendationsPage() {
     const router = useRouter()
@@ -60,8 +60,7 @@ export default function AIRecommendationsPage() {
     }
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Assessment Summary */}
@@ -195,8 +194,8 @@ export default function AIRecommendationsPage() {
                                                             <Star
                                                                 key={i}
                                                                 className={`w-4 h-4 ${i < Math.floor(pkg.rating)
-                                                                        ? "fill-yellow-400 text-yellow-400"
-                                                                        : "text-muted-foreground"
+                                                                    ? "fill-yellow-400 text-yellow-400"
+                                                                    : "text-muted-foreground"
                                                                     }`}
                                                             />
                                                         ))}
@@ -266,6 +265,6 @@ export default function AIRecommendationsPage() {
                     </div>
                 </div>
             </div>
-        </>
+        </DashboardLayout>
     )
 }

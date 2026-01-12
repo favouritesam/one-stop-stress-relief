@@ -3,8 +3,8 @@
 import { useStore } from "@/src/lib/store"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import Navbar from "@/src/components/layout/navbar";
 import AnalyticsDashboard from "@/src/components/expert/analytics-dashboard";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 export default function AnalyticsPage() {
     const { currentUser, isHydrated } = useStore()
@@ -23,21 +23,19 @@ export default function AnalyticsPage() {
 
     if (!isHydrated || !isReady || !currentUser) {
         return (
-            <>
-                <Navbar />
+            <DashboardLayout>
                 <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5 flex items-center justify-center">
                     <div className="text-center">
                         <p className="text-muted-foreground">Loading analytics...</p>
                     </div>
                 </div>
-            </>
+            </DashboardLayout>
         )
     }
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <AnalyticsDashboard />
-        </>
+        </DashboardLayout>
     )
 }

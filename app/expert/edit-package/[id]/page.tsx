@@ -3,8 +3,8 @@
 import { useStore } from "@/src/lib/store"
 import { useRouter } from "next/navigation"
 import { useEffect, use } from "react"
-import Navbar from "@/src/components/layout/navbar"
 import CreatePackageForm from "@/src/components/expert/create-package-form"
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 export default function EditPackagePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
@@ -22,9 +22,8 @@ export default function EditPackagePage({ params }: { params: Promise<{ id: stri
     }
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <CreatePackageForm packageId={id} />
-        </>
+        </DashboardLayout>
     )
 }

@@ -1,10 +1,10 @@
 "use client"
 
-import {useStore} from "@/src/lib/store";
+import { useStore } from "@/src/lib/store";
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import Navbar from "@/src/components/layout/navbar";
 import ExpertDashboard from "@/src/components/expert/dashboard";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 export default function ExpertDashboardPage() {
     const { currentUser } = useStore()
@@ -21,9 +21,8 @@ export default function ExpertDashboardPage() {
     }
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <ExpertDashboard />
-        </>
+        </DashboardLayout>
     )
 }

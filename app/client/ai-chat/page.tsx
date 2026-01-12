@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Send, Loader2, Lightbulb, Languages, Mic, MicOff } from "lucide-react"
 import { useStore } from "@/src/lib/store";
-import Navbar from "@/src/components/layout/navbar";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function AIChatPage() {
@@ -157,8 +157,7 @@ export default function AIChatPage() {
     ]
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-8">
                 <div className="max-w-3xl mx-auto px-4">
                     {/* Chat Container */}
@@ -289,6 +288,6 @@ export default function AIChatPage() {
                     </Card>
                 </div>
             </div>
-        </>
+        </DashboardLayout>
     )
 }

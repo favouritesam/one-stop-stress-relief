@@ -9,7 +9,7 @@ import { XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar } from 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp, Eye, Star, Users } from "lucide-react"
-import Navbar from "@/src/components/layout/navbar";
+import DashboardLayout from "@/src/components/layout/dashboard-layout";
 
 export default function AIInsightsPage() {
     const router = useRouter()
@@ -64,8 +64,7 @@ export default function AIInsightsPage() {
             : 0
 
     return (
-        <>
-            <Navbar />
+        <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
@@ -252,6 +251,6 @@ export default function AIInsightsPage() {
                     </Card>
                 </div>
             </div>
-        </>
+        </DashboardLayout>
     )
 }
