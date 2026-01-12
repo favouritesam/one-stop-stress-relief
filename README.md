@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# One-Stop Stress Relief
 
-## Getting Started
+A comprehensive marketplace application connecting individuals seeking stress relief with verified experts offering personalized digital solutions.
 
-First, run the development server:
+## 🌟 Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**One-Stop Stress Relief** is a dual-sided marketplace designed to bridge the gap between expensive therapy and accessible mental wellness. 
+- **Seekers (Clients)** post their specific stress triggers (like work deadlines, relationship issues) and budget.
+- **Experts** create and sell digital "relief packages" containing guided audio, worksheets, and schedules.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The platform uses **AI Matching** to pair users with the most relevant solution packages based on their stress type, lifestyle, and budget, ensuring effective results at a fraction of traditional therapy costs.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### For Seekers (Clients)
+- **AI-Powered Matching**: Get matched with packages that fit your specific stress triggers and financial constraints.
+- **Personalized Content**: Access tailored packages with guided meditations, time management tools, and coping strategies.
+- **Voice-Enabled AI Chat**: Interact with an empathetic AI assistant using real-time voice recognition for immediate support and recommendations.
+- **Wishlist & Library**: Save interesting packages for later and access purchased content (videos, PDFs) anytime from your dashboard.
+- **Secure Payments**: Purchase solutions seamlessly using safe digital payment methods.
 
-## Learn More
+### For Experts
+- **Content Creation Studio**: Build professional packages using built-in templates for audio guides, PDF worksheets, and progress trackers.
+- **Dynamic Pricing**: Set your own prices ($10-$50+) and adjust based on performance analytics.
+- **Earning Potential**: Keep **80% of every sale** (up to 90% for top-rated experts). Payments are processed weekly.
+- **Analytics Dashboard**: Track sales, user engagement, and rating trends in real-time.
+- **Verification System**: Submit credentials to become a verified expert and unlock premium pricing tiers.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Technology Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project is built with a modern, performance-focused stack:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [Shadcn/ui](https://ui.shadcn.com/)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand) with local storage persistence
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **AI/Voice**: Native Web Speech API & Mock AI Logic
 
-## Deploy on Vercel
+## 🏁 Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Follow these steps to set up the project locally:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd one-stop-stress-relief
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open the application**
+   Visit [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📂 Project Structure
+
+- `/app`: Next.js App Router pages and API routes.
+  - `/client`: Client-facing pages (Marketplace, My Packages, Chat).
+  - `/expert`: Expert-facing pages (Dashboard, Create Package, Analytics).
+- `/src/components`: Reusable UI components and feature-specific blocks.
+- `/src/lib`: Utility functions and global state (`store.ts`).
+
+## 💼 Business Model
+
+- **Users**: Pay per package.
+- **Platform Fee**: The app takes a roughly 20% commission on transactions.
+- **Expert Payout**: Experts receive ~80% of sales. Top-rated experts can earn up to 90%.
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our contributing guidelines for more details on how to submit pull requests, report issues, or request features.
+
+---
+*Empowering wellness, one package at a time.*
