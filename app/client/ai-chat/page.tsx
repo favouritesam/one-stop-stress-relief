@@ -159,7 +159,7 @@ export default function AIChatPage() {
     return (
         <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-8">
-                <div className="max-w-3xl mx-auto px-4">
+                <div className="max-w-6xl mx-auto px-4">
                     {/* Chat Container */}
                     <Card className="border-border/50 flex flex-col h-[600px] overflow-hidden">
                         {/* Header with Language Selector */}

@@ -47,7 +47,7 @@ export default function ClientMarketplace() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header Section */}
                 <div className="mb-8">
                     <div>
@@ -191,7 +191,7 @@ export default function ClientMarketplace() {
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-max">
                         {sortedPackages.map((pkg) => (
                             <PackageCard key={pkg.id} package={pkg} />
                         ))}
