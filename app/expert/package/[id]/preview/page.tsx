@@ -82,7 +82,7 @@ export default function PackagePreviewPage({ params }: { params: Promise<{ id: s
     return (
         <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* Back Button & Preview Badge */}
                     <div className="flex items-center justify-between mb-8">
                         <Button variant="ghost" onClick={() => router.push("/expert/dashboard")} className="gap-2">
@@ -183,7 +183,7 @@ export default function PackagePreviewPage({ params }: { params: Promise<{ id: s
                                     <FileText className="w-6 h-6 text-secondary" />
                                     Worksheets & Resources
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     {pkg.content.worksheets?.map((sheet, index) => (
                                         <div key={index} className="flex items-center gap-3 p-4 border border-border/50 rounded-xl bg-background/50">
                                             <div className="p-2 rounded-lg bg-secondary/10">

@@ -1,7 +1,6 @@
 "use client"
 
 import Sidebar from "@/src/components/layout/sidebar"
-import Navbar from "@/src/components/layout/navbar"
 import { useStore } from "@/src/lib/store"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState, useEffect } from "react"

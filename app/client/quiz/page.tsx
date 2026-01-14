@@ -235,7 +235,7 @@ export default function StressAssessmentQuiz() {
     return (
         <DashboardLayout>
             <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-12">
-                <div className="max-w-2xl mx-auto px-4">
+                <div className="max-w-3xl mx-auto px-4">
                     <Card className="border-border/50">
                         <CardHeader className="text-center">
                             <div className="flex justify-center mb-4">
